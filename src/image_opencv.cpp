@@ -398,7 +398,7 @@ extern "C" int wait_key_cv(int delay)
 
 extern "C" int wait_until_press_key_cv()
 {
-    return wait_key_cv(0);
+    return wait_key_cv(2000);
 }
 // ----------------------------------------
 
@@ -872,6 +872,12 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
         static int frame_id = 0;
         frame_id++;
 
+        int index = 0;
+        int point_x1[15] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+        int point_y1[15] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+        int point_x2[15] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+        int point_y2[15] = {-1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1};
+
         for (i = 0; i < num; ++i) {
             char labelstr[4096] = { 0 };
             int class_id = -1;
@@ -976,6 +982,13 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
                 //cvSaveImage(image_name, copy_img, 0);
                 //cvResetImageROI(copy_img);
 
+                point_x1[index] = left;
+                point_y1[index] = top;
+                point_x2[index] = right;
+                point_y2[index] = bot;
+                index = index + 1;
+
+
                 cv::rectangle(*show_img, pt1, pt2, color, width, 8, 0);
                 if (ext_output)
                     printf("\t(left_x: %4.0f   top_y: %4.0f   width: %4.0f   height: %4.0f)\n",
@@ -993,11 +1006,25 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
         if (ext_output) {
             fflush(stdout);
         }
+
+        for(int k = 0; k < index; k++){
+        printf("(left_x: %4.0f   top_y: %4.0f   right: %4.0f   botton: %4.0f)\n",(float)point_x1[k], (float)point_y1[k], (float)point_x2[k], (float)point_y2[k]);
+
+            for(int kk = 0; kk < index; kk++){
+                if (k != kk){
+                    float dis = sqrt(pow(point_x1[k] - point_x1[kk], 2) + pow(point_y1[k] - point_y1[kk], 2));
+                    printf("\t(left_x: %4.0f   top_y: %4.0f   right: %4.0f   botton: %4.0f)\n",(float)point_x1[kk], (float)point_y1[kk], (float)point_x2[kk], (float)point_y2[kk]);
+                    printf("\t(dis: %4.0f\n",(float)dis);
+                }
+            }
+        }
+
     }
     catch (...) {
         cerr << "OpenCV exception: draw_detections_cv_v3() \n";
     }
 }
+
 // ----------------------------------------
 
 // ====================================================================

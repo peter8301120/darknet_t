@@ -7,6 +7,8 @@
 #include "box.h"
 #include "demo.h"
 #include "option_list.h"
+#include <stdio.h>
+#include <dirent.h> 
 
 #ifndef __COMPAR_FN_T
 #define __COMPAR_FN_T
@@ -356,7 +358,7 @@ void train_detector(char *datacfg, char *cfgfile, char *weightfile, int *gpus, i
             save_weights(net, buff);
         }
 
-        if (iteration >= (iter_save_last + 100) || (iteration % 100 == 0 && iteration > 1)) {
+        if (iteration >= (iter_save_last + 100) || iteration % 100 == 0) {
             iter_save_last = iteration;
 #ifdef GPU
             if (ngpus != 1) sync_nets(nets, ngpus, 0);
@@ -1493,6 +1495,62 @@ void calc_anchors(char *datacfg, int num_of_clusters, int width, int height, int
 void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filename, float thresh,
     float hier_thresh, int dont_show, int ext_output, int save_labels, char *outfile, int letter_box, int benchmark_layers)
 {
+    // dictionary
+    FILE *fp; 
+    char File[256];
+    fp = fopen("File.txt","r");
+
+    while (!feof(fp)) 
+    { 
+        fgets(File,256,fp);
+        printf("%s\n", File);
+    } 
+    fclose(fp);
+
+    // number of points
+    int number = 0;
+    char buffer_n[256];
+    FILE *fp_n; 
+    fp_n = fopen("number.txt","r");
+    while (!feof(fp_n))
+    {
+        fgets(buffer_n,256,fp_n);
+        number = atoi(buffer_n);
+    }
+    fclose(fp_n);
+    printf("%d\n", number);
+
+    // points
+    int points_x[number];
+    int points_y[number];
+    int now_position = 0;
+
+    char buffer[256];
+    FILE *fp_p; 
+    fp_p = fopen("point.txt","r");
+
+    while (!feof(fp_p))
+    {
+        fgets(buffer,256,fp_p);
+        if (now_position < number)
+        {
+            points_x[now_position] = atoi(buffer);
+            //printf("%s\n", (buffer));
+        }
+        fgets(buffer,256,fp_p);
+        if (now_position < number)
+        {
+            points_y[now_position] = atoi(buffer);
+        }
+        now_position = now_position + 1;
+    }
+    fclose(fp_p);
+    for (int i = 0; i < number; i++) 
+    {
+        printf("%d\n", points_x[i]);
+        printf("%d\n", points_y[i]);
+    }
+
     list *options = read_data_cfg(datacfg);
     char *name_list = option_find_str(options, "names", "data/names.list");
     int names_size = 0;
@@ -1528,106 +1586,121 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
     int j;
     float nms = .45;    // 0.4F
     while (1) {
-        if (filename) {
-            strncpy(input, filename, 256);
-            if (strlen(input) > 0)
-                if (input[strlen(input) - 1] == 0x0d) input[strlen(input) - 1] = 0;
+        struct dirent *de;  // Pointer for directory entry 
+        // opendir() returns a pointer of DIR type.  
+        DIR *dr = opendir(File); 
+  
+        if (dr == NULL)  // opendir returns NULL if couldn't open directory 
+        { 
+            printf("Could not open current directory" ); 
+            return 0; 
+        } 
+  
+        // Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html 
+        // for readdir() 
+        while ((de = readdir(dr)) != NULL){
+            char *s;
+            s = strstr(de->d_name, ".JPG");
+            if (s != NULL)
+            {
+                printf("%s\n", de->d_name);
+		strncpy(input, File, sizeof(buffer));
+		strncat(input, "/", sizeof(buffer));
+		strncat(input, de->d_name, sizeof(buffer));
+		//image im;
+		//image sized = load_image_resize(input, net.w, net.h, net.c, &im);
+		image im = load_image(input, 0, 0, net.c);
+		image sized;
+		if(letter_box) sized = letterbox_image(im, net.w, net.h);
+		else sized = resize_image(im, net.w, net.h);
+		layer l = net.layers[net.n - 1];
+
+		//box *boxes = calloc(l.w*l.h*l.n, sizeof(box));
+		//float **probs = calloc(l.w*l.h*l.n, sizeof(float*));
+		//for(j = 0; j < l.w*l.h*l.n; ++j) probs[j] = (float*)xcalloc(l.classes, sizeof(float));
+
+		float *X = sized.data;
+
+		//time= what_time_is_it_now();
+		double time = get_time_point();
+		network_predict(net, X);
+		//network_predict_image(&net, im); letterbox = 1;
+		printf("%s: Predicted in %lf milli-seconds.\n", input, ((double)get_time_point() - time) / 1000);
+		//printf("%s: Predicted in %f seconds.\n", input, (what_time_is_it_now()-time));
+
+		int nboxes = 0;
+		detection *dets = get_network_boxes(&net, im.w, im.h, thresh, hier_thresh, 0, 1, &nboxes, letter_box);
+		if (nms) {
+		    if (l.nms_kind == DEFAULT_NMS) do_nms_sort(dets, nboxes, l.classes, nms);
+		    else diounms_sort(dets, nboxes, l.classes, nms, l.nms_kind, l.beta_nms);
+		}
+		draw_detections2_v3(im, dets, nboxes, thresh, names, alphabet, l.classes, ext_output, points_x, points_y, number);
+                
+		save_image(im, "predictions");
+		if (!dont_show) {
+		    show_image(im, "predictions");
+		}
+
+		if (json_file) {
+		    if (json_buf) {
+		        char *tmp = ", \n";
+		        fwrite(tmp, sizeof(char), strlen(tmp), json_file);
+		    }
+		    ++json_image_id;
+		    json_buf = detection_to_json(dets, nboxes, l.classes, names, json_image_id, input);
+
+		    fwrite(json_buf, sizeof(char), strlen(json_buf), json_file);
+		    free(json_buf);
+		}
+
+		// pseudo labeling concept - fast.ai
+		if (save_labels)
+		{
+		    char labelpath[4096];
+		    replace_image_to_label(input, labelpath);
+
+		    FILE* fw = fopen(labelpath, "wb");
+		    int i;
+		    for (i = 0; i < nboxes; ++i) {
+		        char buff[1024];
+		        int class_id = -1;
+		        float prob = 0;
+		        for (j = 0; j < l.classes; ++j) {
+		            if (dets[i].prob[j] > thresh && dets[i].prob[j] > prob) {
+		                prob = dets[i].prob[j];
+		                class_id = j;
+		            }
+		        }
+		        if (class_id >= 0) {
+		            sprintf(buff, "%d %2.4f %2.4f %2.4f %2.4f\n", class_id, dets[i].bbox.x, dets[i].bbox.y, dets[i].bbox.w, dets[i].bbox.h);
+		            fwrite(buff, sizeof(char), strlen(buff), fw);
+		        }
+		    }
+		    fclose(fw);
+		}
+
+		free_detections(dets, nboxes);
+		free_image(im);
+		free_image(sized);
+
+		if (!dont_show) {
+		    wait_until_press_key_cv();
+		    destroy_all_windows_cv();
+		}
+
+		//if (filename) break;
+	    }
+
+	    if (json_file) {
+		char *tmp = "\n]";
+		fwrite(tmp, sizeof(char), strlen(tmp), json_file);
+		fclose(json_file);
+	    }
+            strncpy(input, File, sizeof(buffer));
         }
-        else {
-            printf("Enter Image Path: ");
-            fflush(stdout);
-            input = fgets(input, 256, stdin);
-            if (!input) break;
-            strtok(input, "\n");
-        }
-        //image im;
-        //image sized = load_image_resize(input, net.w, net.h, net.c, &im);
-        image im = load_image(input, 0, 0, net.c);
-        image sized;
-        if(letter_box) sized = letterbox_image(im, net.w, net.h);
-        else sized = resize_image(im, net.w, net.h);
-        layer l = net.layers[net.n - 1];
-
-        //box *boxes = calloc(l.w*l.h*l.n, sizeof(box));
-        //float **probs = calloc(l.w*l.h*l.n, sizeof(float*));
-        //for(j = 0; j < l.w*l.h*l.n; ++j) probs[j] = (float*)xcalloc(l.classes, sizeof(float));
-
-        float *X = sized.data;
-
-        //time= what_time_is_it_now();
-        double time = get_time_point();
-        network_predict(net, X);
-        //network_predict_image(&net, im); letterbox = 1;
-        printf("%s: Predicted in %lf milli-seconds.\n", input, ((double)get_time_point() - time) / 1000);
-        //printf("%s: Predicted in %f seconds.\n", input, (what_time_is_it_now()-time));
-
-        int nboxes = 0;
-        detection *dets = get_network_boxes(&net, im.w, im.h, thresh, hier_thresh, 0, 1, &nboxes, letter_box);
-        if (nms) {
-            if (l.nms_kind == DEFAULT_NMS) do_nms_sort(dets, nboxes, l.classes, nms);
-            else diounms_sort(dets, nboxes, l.classes, nms, l.nms_kind, l.beta_nms);
-        }
-        draw_detections_v3(im, dets, nboxes, thresh, names, alphabet, l.classes, ext_output);
-        save_image(im, "predictions");
-        if (!dont_show) {
-            show_image(im, "predictions");
-        }
-
-        if (json_file) {
-            if (json_buf) {
-                char *tmp = ", \n";
-                fwrite(tmp, sizeof(char), strlen(tmp), json_file);
-            }
-            ++json_image_id;
-            json_buf = detection_to_json(dets, nboxes, l.classes, names, json_image_id, input);
-
-            fwrite(json_buf, sizeof(char), strlen(json_buf), json_file);
-            free(json_buf);
-        }
-
-        // pseudo labeling concept - fast.ai
-        if (save_labels)
-        {
-            char labelpath[4096];
-            replace_image_to_label(input, labelpath);
-
-            FILE* fw = fopen(labelpath, "wb");
-            int i;
-            for (i = 0; i < nboxes; ++i) {
-                char buff[1024];
-                int class_id = -1;
-                float prob = 0;
-                for (j = 0; j < l.classes; ++j) {
-                    if (dets[i].prob[j] > thresh && dets[i].prob[j] > prob) {
-                        prob = dets[i].prob[j];
-                        class_id = j;
-                    }
-                }
-                if (class_id >= 0) {
-                    sprintf(buff, "%d %2.4f %2.4f %2.4f %2.4f\n", class_id, dets[i].bbox.x, dets[i].bbox.y, dets[i].bbox.w, dets[i].bbox.h);
-                    fwrite(buff, sizeof(char), strlen(buff), fw);
-                }
-            }
-            fclose(fw);
-        }
-
-        free_detections(dets, nboxes);
-        free_image(im);
-        free_image(sized);
-
-        if (!dont_show) {
-            wait_until_press_key_cv();
-            destroy_all_windows_cv();
-        }
-
-        if (filename) break;
+        closedir(dr);
     }
 
-    if (json_file) {
-        char *tmp = "\n]";
-        fwrite(tmp, sizeof(char), strlen(tmp), json_file);
-        fclose(json_file);
-    }
 
     // free memory
     free_ptrs((void**)names, net.layers[net.n - 1].classes);
