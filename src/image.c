@@ -462,8 +462,20 @@ void draw_detections_v3(image im, detection *dets, int num, float thresh, char *
     free(selected_detections);
 }
 
-void draw_detections2_v3(image im, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output, int* xs, int* ys, int number)
+void draw_detections2_v3(image im, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output, int* xs, int* ys, int number, char* File)
 {
+    char input[256];
+    strncpy(input, "./log/", sizeof(input));
+    strncat(input, File, sizeof(input));
+    strncat(input, ".log", sizeof(input));
+
+    FILE *fp; 
+    char buffer[]={ 'H','e','y' };
+    fp = fopen(input,"w");
+
+    fwrite(buffer,1,sizeof(buffer),fp);
+    fclose(fp);
+
     static int frame_id = 0;
     frame_id++;
 
