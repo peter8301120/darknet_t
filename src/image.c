@@ -495,7 +495,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     char input[256];
     strncpy(input, "./ftp-upload/", sizeof(input));
     strncat(input, timeString, sizeof(input));
-    strncat(input, ".log", sizeof(input));
+    strncat(input, ".txt", sizeof(input));
 
     static int frame_id = 0;
     frame_id++;
@@ -728,7 +728,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     sprintf(s,"%ld", dis_final);
 
     // write log file
-    if (dis_final >= 0){
+    if (dis_final > 0){
         int len = strlen(File) + strlen(s) + 2;
         char buffer[len];
         memset(buffer, '\0', len);
