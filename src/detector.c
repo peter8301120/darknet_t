@@ -8,6 +8,7 @@
 #include "demo.h"
 #include "option_list.h"
 #include <stdio.h>
+#include <time.h>
 #include <dirent.h> 
 
 #ifndef __COMPAR_FN_T
@@ -1503,7 +1504,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
     while (!feof(fp)) 
     { 
         fgets(File,256,fp);
-        printf("%s\n", File);
+        //printf("%s\n", File);
     } 
     fclose(fp);
 
@@ -1518,7 +1519,56 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         number = atoi(buffer_n);
     }
     fclose(fp_n);
-    printf("%d\n", number);
+    //printf("%d\n", number);
+
+    // line
+    int line_x[4];
+    int line_y[4];
+    int interval = 5;
+
+    char buffer_l[256];
+    FILE *fp_l; 
+    fp_l = fopen("coordinate.txt","r");
+
+    if (!feof(fp_l))
+    {
+        fgets(buffer_l,256,fp_l);
+        line_x[0] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_y[0] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_x[1] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_y[1] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_x[2] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_y[2] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_x[3] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_y[3] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        interval = atoi(buffer_l);
+    }
+    fclose(fp_l);
+    // formula y = ax + b
+    float a[2];
+    float b[2];
+    a[0] = (float)(line_y[1] - line_y[0]) / (float)(line_x[1] - line_x[0]);
+    b[0] = (float)line_y[1] - (a[0] * (float)line_x[1]);
+    //printf("the function line1 is y = :%fx + %f\n", a[0], b[0]);
+
+    a[1] = (float)(line_y[3] - line_y[2]) / (float)(line_x[3] - line_x[2]);
+    b[1] = (float)line_y[3] - (a[1] * (float)line_x[3]);
+    //printf("the function line2 y = :%fx + %f\n", a[1], b[1]);
+
+    //for (int i = 0; i < 4; i++) 
+    //{
+    //    printf("%d\n", line_x[i]);
+    //    printf("%d\n", line_y[i]);
+    //}
+
 
     // points
     int points_x[number];
@@ -1545,11 +1595,11 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         now_position = now_position + 1;
     }
     fclose(fp_p);
-    for (int i = 0; i < number; i++) 
-    {
-        printf("%d\n", points_x[i]);
-        printf("%d\n", points_y[i]);
-    }
+    //for (int i = 0; i < number; i++) 
+    //{
+    //    printf("%d\n", points_x[i]);
+    //    printf("%d\n", points_y[i]);
+    //}
 
     list *options = read_data_cfg(datacfg);
     char *name_list = option_find_str(options, "names", "data/names.list");
@@ -1585,6 +1635,13 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
     }
     int j;
     float nms = .45;    // 0.4F
+
+    // time
+    char timestr[256];
+    time_t secs = time(0);
+    struct tm *local = localtime(&secs);
+    sprintf(timestr, "%04d%02d%02d%02d", (local->tm_year + 1900), (local->tm_mon + 1), local->tm_mday, local->tm_hour);
+
     while (1) {
         struct dirent *de;  // Pointer for directory entry 
         // opendir() returns a pointer of DIR type.  
@@ -1603,10 +1660,16 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
             s = strstr(de->d_name, ".JPG");
             if (s != NULL)
             {
-                printf("%s\n", de->d_name);
 		strncpy(input, File, sizeof(buffer));
 		strncat(input, "/", sizeof(buffer));
 		strncat(input, de->d_name, sizeof(buffer));
+
+                // if is licence( == 0) remove 
+                if (de->d_name[15] == '0'){
+                    remove(input);
+                    continue;
+                }
+
 		//image im;
 		//image sized = load_image_resize(input, net.w, net.h, net.c, &im);
 		image im = load_image(input, 0, 0, net.c);
@@ -1625,7 +1688,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		double time = get_time_point();
 		network_predict(net, X);
 		//network_predict_image(&net, im); letterbox = 1;
-		printf("%s: Predicted in %lf milli-seconds.\n", input, ((double)get_time_point() - time) / 1000);
+		//printf("%s: Predicted in %lf milli-seconds.\n", input, ((double)get_time_point() - time) / 1000);
 		//printf("%s: Predicted in %f seconds.\n", input, (what_time_is_it_now()-time));
 
 		int nboxes = 0;
@@ -1634,7 +1697,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		    if (l.nms_kind == DEFAULT_NMS) do_nms_sort(dets, nboxes, l.classes, nms);
 		    else diounms_sort(dets, nboxes, l.classes, nms, l.nms_kind, l.beta_nms);
 		}
-		draw_detections2_v3(im, dets, nboxes, thresh, names, alphabet, l.classes, ext_output, points_x, points_y, number, de->d_name);
+		draw_detections2_v3(im, dets, nboxes, thresh, names, alphabet, l.classes, ext_output, points_x, points_y, number, de->d_name, line_x, line_y, a, b, interval, timestr);
                 
 		save_image(im, "predictions");
 		if (!dont_show) {
@@ -1696,7 +1759,8 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		fwrite(tmp, sizeof(char), strlen(tmp), json_file);
 		fclose(json_file);
 	    }
-            strncpy(input, File, sizeof(buffer));
+            // remove
+            remove(input);
         }
         closedir(dr);
     }

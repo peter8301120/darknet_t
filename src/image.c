@@ -6,6 +6,7 @@
 #include "blas.h"
 #include "dark_cuda.h"
 #include <stdio.h>
+#include <time.h>
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
 #endif
@@ -128,15 +129,41 @@ image get_label_v3(image **characters, char *string, int size)
     image label = make_empty_image(0, 0, 0);
     while (*string) {
         image l = characters[size][(int)*string];
+        //show_image(l, "label");
+        //wait_until_press_key_cv();
+        //destroy_all_windows_cv();
         image n = tile_images(label, l, -size - 1 + (size + 1) / 2);
         free_image(label);
         label = n;
         ++string;
     }
     image b = border_image(label, label.h*.25);
+    //b = resize_image(b, 1000, 600);
     free_image(label);
     return b;
 }
+
+image get_label2_v3(image **characters, char *string, int size)
+{
+    size = size / 10;
+    if (size > 7) size = 7;
+    image label = make_empty_image(0, 0, 0);
+    while (*string) {
+        image l = characters[size][(int)*string];
+        //show_image(l, "label");
+        //wait_until_press_key_cv();
+        //destroy_all_windows_cv();
+        image n = tile_images(label, l, -size - 1 + (size + 1) / 2);
+        free_image(label);
+        label = n;
+        ++string;
+    }
+    image b = border_image(label, label.h*.25);
+    b = resize_image(b, 1000, 600);
+    free_image(label);
+    return b;
+}
+
 
 void draw_label(image a, int r, int c, image label, const float *rgb)
 {
@@ -462,19 +489,13 @@ void draw_detections_v3(image im, detection *dets, int num, float thresh, char *
     free(selected_detections);
 }
 
-void draw_detections2_v3(image im, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output, int* xs, int* ys, int number, char* File)
+void draw_detections2_v3(image im, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output, int* xs, int* ys, int number, char* File, int* line_x, int* line_y, float* line_a, float* line_b, int port_interval, char* timeString)
 {
+    // log name
     char input[256];
-    strncpy(input, "./log/", sizeof(input));
-    strncat(input, File, sizeof(input));
+    strncpy(input, "./ftp-upload/", sizeof(input));
+    strncat(input, timeString, sizeof(input));
     strncat(input, ".log", sizeof(input));
-
-    FILE *fp; 
-    char buffer[]={ 'H','e','y' };
-    fp = fopen(input,"w");
-
-    fwrite(buffer,1,sizeof(buffer),fp);
-    fclose(fp);
 
     static int frame_id = 0;
     frame_id++;
@@ -487,7 +508,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     int i;
     for (i = 0; i < selected_detections_num; ++i) {
         const int best_class = selected_detections[i].best_class;
-        printf("%s: %.0f%%", names[best_class],    selected_detections[i].det.prob[best_class] * 100);
+        //printf("%s: %.0f%%", names[best_class],    selected_detections[i].det.prob[best_class] * 100);
         if (ext_output)
             printf("\t(left_x: %4.0f   top_y: %4.0f   width: %4.0f   height: %4.0f)\n",
                 round((selected_detections[i].det.bbox.x - selected_detections[i].det.bbox.w / 2)*im.w),
@@ -511,12 +532,41 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
         }
     }
 
+    // draw line
+    int width = im.h * .006;
+    if (width < 1)
+        width = 1;
+    for (int l = 0; l < 2; l++){
+        int flag = 1;
+            if (line_x[l * 2] > line_x[(l * 2) + 1])
+                flag = -1;
+            float diff_x = abs((float)line_x[l * 2] - (float)line_x[(l * 2) + 1]);
+            float diff_y = abs((float)line_y[l * 2] - (float)line_y[(l * 2) + 1]);
+            int seg_num = 500;
+            float interval_x = diff_x / (seg_num);
+            float interval_y = diff_y / (seg_num);
+            for (int k = 0; k < seg_num + 50; k++)
+            {
+            // draw point
+                draw_box_width(im, line_x[l * 2] + (k * interval_x * flag) - 8, line_y[l * 2] - (k * interval_y * flag) - 8, line_x[l * 2] + (k * interval_x * flag) + 8, line_y[l * 2] - (k * interval_y * flag) + 8, width, 255, 0, 0);
+            }
+    }
+    // draw horizontal line
+    for (int l = 0; l < 4096; (l = l + 8)){
+        draw_box_width(im, l - 8 , ys[0] - 8, l + 8, ys[0] + 8,width, 0, 128, 128);
+    }
+    for (int l = 0; l < 4096; (l = l + 8)){
+        draw_box_width(im, l - 8 , ys[number - 1] - 8, l + 8, ys[number - 1] + 8,width, 0, 128, 128);
+    }
+
+    int object_between_lines = 0;
+    int object_bot[selected_detections_num];
+    float distance[selected_detections_num];
+
+
     // image output
     qsort(selected_detections, selected_detections_num, sizeof(*selected_detections), compare_by_probs);
     for (i = 0; i < selected_detections_num; ++i) {
-            int width = im.h * .006;
-            if (width < 1)
-                width = 1;
 
             /*
             if(0){
@@ -544,6 +594,8 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
             int right = (b.x + b.w / 2.)*im.w;
             int top = (b.y - b.h / 2.)*im.h;
             int bot = (b.y + b.h / 2.)*im.h;
+            int middle_x = (int)((left + right) / 2);
+            int middle_y = (int)((top + bot) / 2);
 
             if (left < 0) left = 0;
             if (right > im.w - 1) right = im.w - 1;
@@ -572,18 +624,37 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
             //sprintf(image_name, "result_img/img_%d_%d_%d_%s.jpg", frame_id, img_id, best_class_id, names[best_class_id]);
             //save_image(cropped_im, image_name);
             //free_image(cropped_im);
-            printf("%d\n", number);
-            for (int i = 0; i < number; i++)
+            //printf("%d\n", number);
+
+            
+
+            for (int j = 0; j < number; j++)
             {
-                draw_box_width(im, xs[i] - 20, ys[i] - 20, xs[i] + 20, ys[i] + 20, width, 255, 0, 0);
-                //draw_point(im, xs[i], ys[i], red, green, blue);
+                // draw point
+                draw_box_width(im, xs[j] - 15, ys[j] - 15, xs[j] + 15, ys[j] + 15, width, 0, 255, 0);
+
+                // compute distance between if object is in two lines
+                if (ys[j] < bot && bot < ys[j + 1] && j != number - 1 && ((float)middle_y - (line_a[0] * (float)middle_x + line_b[0])) > 0 && ((float)middle_y - (line_a[1] * (float)middle_x + line_b[1])) < 0)
+                {
+                    int total = ys[j + 1] - ys[j];
+                    int current = ys[j + 1] - bot;
+                    float percent = (float)current / (float)total;
+                    object_bot[object_between_lines] = bot;
+                    distance[object_between_lines] = (number - j - 2 ) * port_interval + percent * port_interval;
+                    object_between_lines = object_between_lines + 1;
+                    //printf("number: %d\n", j);
+                    //printf("left: %d, right: %d, top: %d, bot: %d\n", left, right, top, bot);
+                    //printf("total: %d, current: %d, precent: %f, dis: %f\n", total, current, percent, distance[object_between_lines - 1]);
+                }
             }
+
             if (im.c == 1) {
                 draw_box_width_bw(im, left, top, right, bot, width, 0.8);    // 1 channel Black-White
             }
             else {
                 draw_box_width(im, left, top, right, bot, width, red, green, blue); // 3 channels RGB
             }
+
             if (alphabet) {
                 char labelstr[4096] = { 0 };
                 strcat(labelstr, names[selected_detections[i].best_class]);
@@ -594,9 +665,9 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
                         strcat(labelstr, names[j]);
                     }
                 }
-                image label = get_label_v3(alphabet, labelstr, (im.h*.03));
-                draw_label(im, top + width, left, label, rgb);
-                free_image(label);
+                //image label = get_label_v3(alphabet, labelstr, (im.h*.03));
+                //draw_label(im, top + width, left, label, rgb);
+                //free_image(label);
             }
             if (selected_detections[i].det.mask) {
                 image mask = float_to_image(14, 14, 1, selected_detections[i].det.mask);
@@ -608,6 +679,73 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
                 free_image(tmask);
             }
     }
+
+    // compute distance between two objects with lowest bot
+    int max = -999;
+    int max2 = -999;
+    int max_index = -1;
+    int max2_index = -1;
+    if (object_between_lines > 1){
+        for(int j = 0; j < object_between_lines; j++){
+            if (object_bot[j] > max && j > 0){
+                max2 = max;
+                max2_index = max_index;
+                max = object_bot[j];
+                max_index = j;
+            }
+            else if(j == 0){
+                max2 = object_bot[j];
+                max2_index = j;
+                max = object_bot[j];
+                max_index = j;
+            }
+            else if(j == 1){
+                if (object_bot[j] > max){
+                    max = object_bot[j];
+                    max_index = j;
+                }
+                else{
+                    max2 = object_bot[j];
+                    max2_index = j;
+                }
+            }
+        }
+    }
+    //printf("min: %d, min_index: %d, min2: %d, min2_index: %d\n", max, max_index, max2, max2_index);
+
+    //distance and plot
+    float rgb[3];
+
+    rgb[0] = 255;
+    rgb[1] = 0;
+    rgb[2] = 0;
+
+    int dis_final = 0;
+    if (max_index != -1){
+        dis_final = (int)(distance[max2_index] - distance[max_index]);
+    }
+    char s[11]; 
+    sprintf(s,"%ld", dis_final);
+
+    // write log file
+    if (dis_final >= 0){
+        int len = strlen(File) + strlen(s) + 2;
+        char buffer[len];
+        memset(buffer, '\0', len);
+        FILE *fp; 
+        strncat(buffer, File, sizeof(buffer));
+        strncat(buffer, " ", sizeof(buffer));
+        strncat(buffer, s, sizeof(buffer));
+        strncat(buffer, "\n", sizeof(buffer));
+        fp = fopen(input,"a");
+        fwrite(buffer,1,sizeof(buffer),fp);
+        fclose(fp);
+    }
+
+    image label = get_label2_v3(alphabet, s, (im.h*.03));
+    draw_label(im, 20, 20, label, rgb);
+    free_image(label);
+
     free(selected_detections);
 }
 

@@ -398,7 +398,7 @@ extern "C" int wait_key_cv(int delay)
 
 extern "C" int wait_until_press_key_cv()
 {
-    return wait_key_cv(2000);
+    return wait_key_cv(2500);
 }
 // ----------------------------------------
 
@@ -440,7 +440,10 @@ extern "C" void show_image_cv(image p, const char *name)
         cv::Mat mat = image_to_mat(copy);
         if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
         else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
-        cv::namedWindow(name, cv::WINDOW_NORMAL);
+        cv::resize( mat, mat, cv::Size(1280, 685) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 1280, 685);
+        cv::moveWindow(name, 0, 500);
         cv::imshow(name, mat);
         free_image(copy);
     }
