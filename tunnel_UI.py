@@ -155,6 +155,7 @@ def str2temp(temp_str):
 
 def openfile():
     global File, l_coordinate, image
+
     # if load the line coordinate from file
     if (l_coordinate == 1):
        File = askdirectory(parent=root, initialdir="./",title='Select an dictionary')
@@ -163,7 +164,8 @@ def openfile():
         File = askdirectory(parent=root, initialdir="./",title='Select an dictionary')
         image_list = os.listdir(File)
         image = image_list[0]
-
+        if(image[15] == "0"):
+            image = image_list[1]
 
         # read first image
         image = cv2.imread(os.path.join(File, image))
