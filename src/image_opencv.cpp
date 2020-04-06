@@ -398,7 +398,7 @@ extern "C" int wait_key_cv(int delay)
 
 extern "C" int wait_until_press_key_cv()
 {
-    return wait_key_cv(2500);
+    return wait_key_cv(150);
 }
 // ----------------------------------------
 
@@ -1020,6 +1020,228 @@ extern "C" void draw_detections_cv_v3(mat_cv* mat, detection *dets, int num, flo
                     printf("\t(dis: %4.0f\n",(float)dis);
                 }
             }
+        }
+
+    }
+    catch (...) {
+        cerr << "OpenCV exception: draw_detections_cv_v3() \n";
+    }
+}
+
+extern "C" void draw_detections_cv2_v3(mat_cv* mat, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output, int* xs, int* ys, int number, int* line_x, int* line_y, float* line_a, float* line_b, int port_interval)
+{
+    try {
+        cv::Mat *show_img = (cv::Mat*)mat;
+
+
+        int i, j;
+        if (!show_img) return;
+
+        // plot line and point
+        cv::line(*show_img, cv::Point(line_x[0], line_y[0]), cv::Point(line_x[1], line_y[1]), cv::Scalar(0,0,255), 5, 8);
+        cv::line(*show_img, cv::Point(line_x[2], line_y[2]), cv::Point(line_x[3], line_y[3]), cv::Scalar(0,0,255), 5, 8);
+        // horontal line
+        for (int l = 0; l < 4096; (l = l + 2)){
+            cv::circle(*show_img , cv::Point(l, ys[0]), 2, cv::Scalar(255,0,0), 5, 8, 0);
+        }
+        for (int l = 0; l < 4096; (l = l + 2)){
+            cv::circle(*show_img , cv::Point(l, ys[number - 1]), 2, cv::Scalar(255,0,0), 5, 8, 0);
+        }
+        for (int j = 0; j < number; j++){
+            // draw point
+             cv::circle(*show_img , cv::Point(xs[j], ys[j]), 3, cv::Scalar(0,255,0), 5, 8, 0);
+        }
+
+
+        static int frame_id = 0;
+        frame_id++;
+
+        int object_between_lines = 0;
+        int object_bot[num];
+        float distance[num];
+
+        for (i = 0; i < num; ++i) {
+            char labelstr[4096] = { 0 };
+            int class_id = -1;
+            for (j = 0; j < classes; ++j) {
+                int show = strncmp(names[j], "dont_show", 9);
+                if (dets[i].prob[j] > thresh && show) {
+                    if (class_id < 0) {
+                        strcat(labelstr, names[j]);
+                        class_id = j;
+                        char buff[10];
+                        sprintf(buff, " (%2.0f%%)", dets[i].prob[j] * 100);
+                        strcat(labelstr, buff);
+                        printf("%s: %.0f%% ", names[j], dets[i].prob[j] * 100);
+                    }
+                    else {
+                        strcat(labelstr, ", ");
+                        strcat(labelstr, names[j]);
+                        printf(", %s: %.0f%% ", names[j], dets[i].prob[j] * 100);
+                    }
+                }
+            }
+            if (class_id >= 0) {
+                int width = std::max(1.0f, show_img->rows * .002f);
+
+                //if(0){
+                //width = pow(prob, 1./2.)*10+1;
+                //alphabet = 0;
+                //}
+
+                //printf("%d %s: %.0f%%\n", i, names[class_id], prob*100);
+                int offset = class_id * 123457 % classes;
+                float red = get_color(2, offset, classes);
+                float green = get_color(1, offset, classes);
+                float blue = get_color(0, offset, classes);
+                float rgb[3];
+
+                //width = prob*20+2;
+
+                rgb[0] = red;
+                rgb[1] = green;
+                rgb[2] = blue;
+                box b = dets[i].bbox;
+                if (std::isnan(b.w) || std::isinf(b.w)) b.w = 0.5;
+                if (std::isnan(b.h) || std::isinf(b.h)) b.h = 0.5;
+                if (std::isnan(b.x) || std::isinf(b.x)) b.x = 0.5;
+                if (std::isnan(b.y) || std::isinf(b.y)) b.y = 0.5;
+                b.w = (b.w < 1) ? b.w : 1;
+                b.h = (b.h < 1) ? b.h : 1;
+                b.x = (b.x < 1) ? b.x : 1;
+                b.y = (b.y < 1) ? b.y : 1;
+                //printf("%f %f %f %f\n", b.x, b.y, b.w, b.h);
+
+                int left = (b.x - b.w / 2.)*show_img->cols;
+                int right = (b.x + b.w / 2.)*show_img->cols;
+                int top = (b.y - b.h / 2.)*show_img->rows;
+                int bot = (b.y + b.h / 2.)*show_img->rows;
+
+                if (left < 0) left = 0;
+                if (right > show_img->cols - 1) right = show_img->cols - 1;
+                if (top < 0) top = 0;
+                if (bot > show_img->rows - 1) bot = show_img->rows - 1;
+
+                //int b_x_center = (left + right) / 2;
+                //int b_y_center = (top + bot) / 2;
+                //int b_width = right - left;
+                //int b_height = bot - top;
+                //sprintf(labelstr, "%d x %d - w: %d, h: %d", b_x_center, b_y_center, b_width, b_height);
+
+                float const font_size = show_img->rows / 1000.F;
+                cv::Size const text_size = cv::getTextSize(labelstr, cv::FONT_HERSHEY_COMPLEX_SMALL, font_size, 1, 0);
+                cv::Point pt1, pt2, pt_text, pt_text_bg1, pt_text_bg2;
+                pt1.x = left;
+                pt1.y = top;
+                pt2.x = right;
+                pt2.y = bot;
+                pt_text.x = left;
+                pt_text.y = top - 4;// 12;
+                pt_text_bg1.x = left;
+                pt_text_bg1.y = top - (3 + 18 * font_size);
+                pt_text_bg2.x = right;
+                if ((right - left) < text_size.width) pt_text_bg2.x = left + text_size.width;
+                pt_text_bg2.y = top;
+                cv::Scalar color;
+                color.val[0] = red * 256;
+                color.val[1] = green * 256;
+                color.val[2] = blue * 256;
+
+                // you should create directory: result_img
+                //static int copied_frame_id = -1;
+                //static IplImage* copy_img = NULL;
+                //if (copied_frame_id != frame_id) {
+                //    copied_frame_id = frame_id;
+                //    if(copy_img == NULL) copy_img = cvCreateImage(cvSize(show_img->width, show_img->height), show_img->depth, show_img->nChannels);
+                //    cvCopy(show_img, copy_img, 0);
+                //}
+                //static int img_id = 0;
+                //img_id++;
+                //char image_name[1024];
+                //sprintf(image_name, "result_img/img_%d_%d_%d_%s.jpg", frame_id, img_id, class_id, names[class_id]);
+                //CvRect rect = cvRect(pt1.x, pt1.y, pt2.x - pt1.x, pt2.y - pt1.y);
+                //cvSetImageROI(copy_img, rect);
+                //cvSaveImage(image_name, copy_img, 0);
+                //cvResetImageROI(copy_img);
+               
+                int middle_x = (int)((left + right) / 2);
+                int middle_y = (int)((top + bot) / 2); 
+
+                for (int j = 0; j < number; j++)
+                {
+                    // compute distance between if object is in two lines
+                    if (ys[j] < bot && bot < ys[j + 1] && j != number - 1 && ((float)middle_y - (line_a[0] * (float)middle_x + line_b[0])) > 0 && ((float)middle_y - (line_a[1] * (float)middle_x + line_b[1])) < 0)
+                    {
+                        int total = ys[j + 1] - ys[j];
+                        int current = ys[j + 1] - bot;
+                        float percent = (float)current / (float)total;
+                        object_bot[object_between_lines] = bot;
+                        distance[object_between_lines] = (number - j - 2 ) * port_interval + percent * port_interval;
+                        object_between_lines = object_between_lines + 1;
+                        //printf("number: %d\n", j);
+                        //printf("left: %d, right: %d, top: %d, bot: %d\n", left, right, top, bot);
+                        //printf("total: %d, current: %d, precent: %f, dis: %f\n", total, current, percent, distance[object_between_lines - 1]);
+                    }
+                }
+
+                cv::rectangle(*show_img, pt1, pt2, color, width, 8, 0);
+                if (ext_output)
+                    printf("\t(left_x: %4.0f   top_y: %4.0f   width: %4.0f   height: %4.0f)\n",
+                    (float)left, (float)top, b.w*show_img->cols, b.h*show_img->rows);
+                else
+                    printf("\n");
+
+                //cv::rectangle(*show_img, pt_text_bg1, pt_text_bg2, color, width, 8, 0);
+                //cv::rectangle(*show_img, pt_text_bg1, pt_text_bg2, color, CV_FILLED, 8, 0);    // filled
+                cv::Scalar black_color = CV_RGB(0, 0, 0);
+                //cv::putText(*show_img, labelstr, pt_text, cv::FONT_HERSHEY_COMPLEX_SMALL, font_size, black_color, 2 * font_size, CV_AA);
+                // cv::FONT_HERSHEY_COMPLEX_SMALL, cv::FONT_HERSHEY_SIMPLEX
+            }
+        }
+
+        // compute distance between two objects with lowest bot
+        int max = -999;
+        int max2 = -999;
+        int max_index = -1;
+        int max2_index = -1;
+        if (object_between_lines > 1){
+            for(int j = 0; j < object_between_lines; j++){
+                if (object_bot[j] > max && j > 0){
+                    max2 = max;
+                    max2_index = max_index;
+                    max = object_bot[j];
+                    max_index = j;
+                }
+                else if(j == 0){
+                    max2 = object_bot[j];
+                    max2_index = j;
+                    max = object_bot[j];
+                    max_index = j;
+                }
+                else if(j == 1){
+                    if (object_bot[j] > max){
+                        max = object_bot[j];
+                        max_index = j;
+                    }
+                    else{
+                        max2 = object_bot[j];
+                        max2_index = j;
+                    }
+                }
+            }
+        }
+
+        int dis_final = 0;
+        if (max_index != -1){
+            dis_final = (int)(distance[max2_index] - distance[max_index]);
+        }
+        char s[11]; 
+        sprintf(s,"%ld", dis_final);
+        float const font_size_f = show_img->rows / 100.F;
+        cv::putText(*show_img, s, cv::Point(200, 200), cv::FONT_HERSHEY_COMPLEX_SMALL, font_size_f, cv::Scalar(0,0,255), 2 * font_size_f, CV_AA);
+
+        if (ext_output) {
+            fflush(stdout);
         }
 
     }

@@ -105,6 +105,108 @@ void demo(char *cfgfile, char *weightfile, float thresh, float hier_thresh, int 
     int frame_skip, char *prefix, char *out_filename, int mjpeg_port, int json_port, int dont_show, int ext_output, int letter_box_in, int time_limit_sec, char *http_post_host,
     int benchmark, int benchmark_layers)
 {
+
+    // dictionary
+    FILE *fp; 
+    char File[256];
+    fp = fopen("File.txt","r");
+
+    while (!feof(fp)) 
+    { 
+        fgets(File,256,fp);
+        //printf("%s\n", File);
+    } 
+    fclose(fp);
+
+    // number of points
+    int number = 0;
+    char buffer_n[256];
+    FILE *fp_n; 
+    fp_n = fopen("number.txt","r");
+    while (!feof(fp_n))
+    {
+        fgets(buffer_n,256,fp_n);
+        number = atoi(buffer_n);
+    }
+    fclose(fp_n);
+    //printf("%d\n", number);
+
+    // line
+    int line_x[4];
+    int line_y[4];
+    int interval = 5;
+
+    char buffer_l[256];
+    FILE *fp_l; 
+    fp_l = fopen("coordinate.txt","r");
+
+    if (!feof(fp_l))
+    {
+        fgets(buffer_l,256,fp_l);
+        line_x[0] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_y[0] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_x[1] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_y[1] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_x[2] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_y[2] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_x[3] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        line_y[3] = atoi(buffer_l);
+        fgets(buffer_l,256,fp_l);
+        interval = atoi(buffer_l);
+    }
+    fclose(fp_l);
+    // formula y = ax + b
+    float a[2];
+    float b[2];
+    a[0] = (float)(line_y[1] - line_y[0]) / (float)(line_x[1] - line_x[0]);
+    b[0] = (float)line_y[1] - (a[0] * (float)line_x[1]);
+    //printf("the function line1 is y = :%fx + %f\n", a[0], b[0]);
+
+    a[1] = (float)(line_y[3] - line_y[2]) / (float)(line_x[3] - line_x[2]);
+    b[1] = (float)line_y[3] - (a[1] * (float)line_x[3]);
+    //printf("the function line2 y = :%fx + %f\n", a[1], b[1]);
+
+    //for (int i = 0; i < 4; i++) 
+    //{
+    //    printf("%d\n", line_x[i]);
+    //    printf("%d\n", line_y[i]);
+    //}
+
+
+    // points
+    int points_x[number];
+    int points_y[number];
+    int now_position = 0;
+
+    char buffer[256];
+    FILE *fp_p; 
+    fp_p = fopen("point.txt","r");
+
+    while (!feof(fp_p))
+    {
+        fgets(buffer,256,fp_p);
+        if (now_position < number)
+        {
+            points_x[now_position] = atoi(buffer);
+            //printf("%s\n", (buffer));
+        }
+        fgets(buffer,256,fp_p);
+        if (now_position < number)
+        {
+            points_y[now_position] = atoi(buffer);
+        }
+        now_position = now_position + 1;
+    }
+    fclose(fp_p);
+
+
     letter_box = letter_box_in;
     in_img = det_img = show_img = NULL;
     //skip = frame_skip;
@@ -245,7 +347,7 @@ void demo(char *cfgfile, char *weightfile, float thresh, float hier_thresh, int 
                 }
             }
 
-            if (!benchmark) draw_detections_cv_v3(show_img, local_dets, local_nboxes, demo_thresh, demo_names, demo_alphabet, demo_classes, demo_ext_output);
+            if (!benchmark) draw_detections_cv2_v3(show_img, local_dets, local_nboxes, demo_thresh, demo_names, demo_alphabet, demo_classes, demo_ext_output, points_x, points_y, number, line_x, line_y, a, b, interval);
             free_detections(local_dets, local_nboxes);
 
             printf("\nFPS:%.1f \t AVG_FPS:%.1f\n", fps, avg_fps);
