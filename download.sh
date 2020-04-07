@@ -1,15 +1,15 @@
-HOST=192.168.24.152
-USERNAME=asv
-PASSWORD=1234
-lftp asv:1234@192.168.24.152 <<EOF  
+HOST=192.168.2.102
+USERNAME=myuser
+PASSWORD=abvc123456
+lftp myuser:abvc123456@192.168.2.102 <<EOF  
 	lcd ./ftp-download
-	cd /image/download01
+	cd /Image/Download01
 	cd `date +"%Y%m%d%H"`
 	mget *.jpg
 	mget *.JPG
 	cd ..
 	cd ..
-	cd ./download02
+	cd ./Download02
 	cd `date +"%Y%m%d%H"`
 	mget *.jpg
 	mget *.JPG

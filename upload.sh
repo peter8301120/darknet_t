@@ -1,9 +1,9 @@
-HOST=192.168.24.152
-USERNAME=asv
-PASSWORD=1234
+HOST=192.168.2.102
+USERNAME=myuser
+PASSWORD=abvc123456
 filename=echo date +"%Y%m%d%H".txt
 echo $filename
-lftp asv:1234@192.168.24.152 << EOF
+lftp myuser:abvc123456@192.168.2.102 << EOF
   lcd ./ftp-upload
   mkdir txt
   cd txt
