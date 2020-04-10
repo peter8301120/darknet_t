@@ -1673,6 +1673,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         // Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html 
         // for readdir() 
         while ((de = readdir(dr)) != NULL){
+            sleep(0.01);
             char *s;
             s = strstr(de->d_name, ".JPG");
             //printf("%s\n", de->d_name);
@@ -1722,13 +1723,6 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		if (!dont_show) {
                     //printf("c_num: %d , all: %d\n", camera_number, all);
 		    show_image2(im, camera_number, all);
-
-                    // save picture
-                    char image_path[256];
-                    strncpy(image_path, "./ftp-upload01/", sizeof(image_path));
-                    strncat(image_path, de->d_name, sizeof(image_path));
-                    write_image(im, image_path);
-		    //show_image(im, "aa");
 		}
 
 		if (json_file) {
@@ -1787,8 +1781,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		fclose(json_file);
 	    }
             // remove
-            remove(input);
-            sleep(0.01); 
+            remove(input); 
         }
         closedir(dr);
 
@@ -1806,6 +1799,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         // Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html 
         // for readdir() 
         while ((de2 = readdir(dr2)) != NULL){
+            sleep(0.01);
             char *s;
             s = strstr(de2->d_name, ".JPG");
             //printf("%s\n", de2->d_name);
@@ -1855,12 +1849,6 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		if (!dont_show) {
 		    //printf("c_num: %d , all: %d\n", camera_number, all);
 		    show_image2(im, camera_number, all);
-
-                    // save picture
-                    char image_path[256];
-                    strncpy(image_path, "./ftp-upload02/", sizeof(image_path));
-                    strncat(image_path, de2->d_name, sizeof(image_path));
-                    write_image(im, image_path);
 		}
 
 		if (json_file) {
@@ -1920,7 +1908,6 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 	    }
             // remove
             remove(input);
-            sleep(0.01); 
         }
         closedir(dr2);
     }

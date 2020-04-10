@@ -159,7 +159,7 @@ image get_label2_v3(image **characters, char *string, int size)
         ++string;
     }
     image b = border_image(label, label.h*.25);
-    b = resize_image(b, 1000, 600);
+    b = resize_image(b, 500, 300);
     free_image(label);
     return b;
 }
@@ -750,9 +750,23 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     }
 
     image label = get_label2_v3(alphabet, s, (im.h*.03));
-    draw_label(im, 20, 20, label, rgb);
+    draw_label(im, 2100, 3500, label, rgb);
     free_image(label);
 
+    // save picture
+    if (dis_final >= 0){
+        char image_path[256];
+        strncpy(image_path, "./ftp-upload01/", sizeof(image_path));
+        if (camera_num > 9 )
+        {
+            strncpy(image_path, "./ftp-upload02/", sizeof(image_path));
+        }
+        strncat(image_path, File, sizeof(image_path));
+        strncat(image_path, "_", sizeof(image_path));
+        strncat(image_path, s, sizeof(image_path));
+        strncat(image_path, ".jpg", sizeof(image_path));
+        write_image(im, image_path);
+    }
     free(selected_detections);
 }
 
