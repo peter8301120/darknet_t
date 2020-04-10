@@ -1722,6 +1722,12 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		if (!dont_show) {
                     //printf("c_num: %d , all: %d\n", camera_number, all);
 		    show_image2(im, camera_number, all);
+
+                    // save picture
+                    char image_path[256];
+                    strncpy(image_path, "./ftp-upload01/", sizeof(image_path));
+                    strncat(image_path, de->d_name, sizeof(image_path));
+                    write_image(im, image_path);
 		    //show_image(im, "aa");
 		}
 
@@ -1849,6 +1855,12 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		if (!dont_show) {
 		    //printf("c_num: %d , all: %d\n", camera_number, all);
 		    show_image2(im, camera_number, all);
+
+                    // save picture
+                    char image_path[256];
+                    strncpy(image_path, "./ftp-upload02/", sizeof(image_path));
+                    strncat(image_path, de2->d_name, sizeof(image_path));
+                    write_image(im, image_path);
 		}
 
 		if (json_file) {

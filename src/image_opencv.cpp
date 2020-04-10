@@ -431,6 +431,24 @@ static float get_pixel(image m, int x, int y, int c)
 }
 // ----------------------------------------
 
+extern "C" void write_image(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::imwrite( name, mat );
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+
 extern "C" void show_image_cv(image p, const char *name)
 {
     try {
