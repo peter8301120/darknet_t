@@ -214,14 +214,14 @@ def str2temp(temp_str):
 def save():
     global number, numberfile, point_x, point_y, pointfile
     # save number of point
-    f = open(numberfile, "a")
+    f = open(numberfile, "w")
     f.write(str(int(number)) + " ")
     f.close()
 
     # use y sort point list
     point_y, point_x = zip(*sorted(zip(point_y, point_x)))
 
-    f = open(pointfile, "a")
+    f = open(pointfile, "w")
     for i in range(len(point_x)):
         f.write(str(int(point_x[i] * 3.2)) + "\n")
         f.write(str(int(point_y[i] * 3.2)) + "\n")

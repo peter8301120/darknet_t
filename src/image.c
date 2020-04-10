@@ -489,11 +489,15 @@ void draw_detections_v3(image im, detection *dets, int num, float thresh, char *
     free(selected_detections);
 }
 
-void draw_detections2_v3(image im, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output, int* xs, int* ys, int number, char* File, int* line_x, int* line_y, float* line_a, float* line_b, int port_interval, char* timeString)
+void draw_detections2_v3(image im, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output, int* xs, int* ys, int number, char* File, int* line_x, int* line_y, float* line_a, float* line_b, int* port_interval, char* timeString, int* total_num, int camera_num)
 {
     // log name
     char input[256];
-    strncpy(input, "./ftp-upload/", sizeof(input));
+    strncpy(input, "./ftp-upload01/", sizeof(input));
+    if (camera_num > 9 )
+    {
+        strncpy(input, "./ftp-upload02/", sizeof(input));
+    }
     strncat(input, timeString, sizeof(input));
     strncat(input, ".txt", sizeof(input));
 
@@ -536,7 +540,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     int width = im.h * .006;
     if (width < 1)
         width = 1;
-    for (int l = 0; l < 2; l++){
+    for (int l = (camera_num * 2); l < (camera_num * 2) + 2; l++){
         int flag = 1;
             if (line_x[l * 2] > line_x[(l * 2) + 1])
                 flag = -1;
@@ -547,16 +551,22 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
             float interval_y = diff_y / (seg_num);
             for (int k = 0; k < seg_num + 50; k++)
             {
-            // draw point
                 draw_box_width(im, line_x[l * 2] + (k * interval_x * flag) - 8, line_y[l * 2] - (k * interval_y * flag) - 8, line_x[l * 2] + (k * interval_x * flag) + 8, line_y[l * 2] - (k * interval_y * flag) + 8, width, 255, 0, 0);
             }
     }
+    for (int j = total_num[camera_num]; j < total_num[camera_num + 1]; j++)
+    {
+        // draw point
+        draw_box_width(im, xs[j] - 15, ys[j] - 15, xs[j] + 15, ys[j] + 15, width, 0, 255, 0);
+    }
+
+
     // draw horizontal line
     for (int l = 0; l < 4096; (l = l + 8)){
-        draw_box_width(im, l - 8 , ys[0] - 8, l + 8, ys[0] + 8,width, 0, 128, 128);
+        draw_box_width(im, l - 8 , ys[total_num[camera_num]] - 8, l + 8, ys[total_num[camera_num]] + 8,width, 0, 128, 128);
     }
     for (int l = 0; l < 4096; (l = l + 8)){
-        draw_box_width(im, l - 8 , ys[number - 1] - 8, l + 8, ys[number - 1] + 8,width, 0, 128, 128);
+        draw_box_width(im, l - 8 , ys[total_num[camera_num + 1] - 1] - 8, l + 8, ys[total_num[camera_num + 1] - 1] + 8,width, 0, 128, 128);
     }
 
     int object_between_lines = 0;
@@ -628,21 +638,18 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
 
             
 
-            for (int j = 0; j < number; j++)
+            for (int j = total_num[camera_num]; j < total_num[camera_num + 1]; j++)
             {
-                // draw point
-                draw_box_width(im, xs[j] - 15, ys[j] - 15, xs[j] + 15, ys[j] + 15, width, 0, 255, 0);
-
                 // compute distance between if object is in two lines
-                if (ys[j] < bot && bot < ys[j + 1] && j != number - 1 && ((float)middle_y - (line_a[0] * (float)middle_x + line_b[0])) > 0 && ((float)middle_y - (line_a[1] * (float)middle_x + line_b[1])) < 0)
+                if (ys[j] < middle_y && middle_y < ys[j + 1] && j != total_num[camera_num + 1] - 1 && ((float)middle_y - (line_a[camera_num * 2] * (float)middle_x + line_b[camera_num * 2])) > 0 && ((float)middle_y - (line_a[camera_num * 2 + 1] * (float)middle_x + line_b[camera_num * 2 + 1])) < 0)
                 {
                     int total = ys[j + 1] - ys[j];
-                    int current = ys[j + 1] - bot;
+                    int current = ys[j + 1] - middle_y;
                     float percent = (float)current / (float)total;
-                    object_bot[object_between_lines] = bot;
-                    distance[object_between_lines] = (number - j - 2 ) * port_interval + percent * port_interval;
+                    object_bot[object_between_lines] = middle_y;
+                    distance[object_between_lines] = (total_num[camera_num + 1] - j - 2) * port_interval[camera_num] + percent * port_interval[camera_num];
                     object_between_lines = object_between_lines + 1;
-                    //printf("number: %d\n", j);
+                    //printf("number: %d, total_number: %d\n", j, total_num[camera_num + 1]);
                     //printf("left: %d, right: %d, top: %d, bot: %d\n", left, right, top, bot);
                     //printf("total: %d, current: %d, precent: %f, dis: %f\n", total, current, percent, distance[object_between_lines - 1]);
                 }

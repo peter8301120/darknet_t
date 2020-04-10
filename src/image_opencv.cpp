@@ -398,7 +398,7 @@ extern "C" int wait_key_cv(int delay)
 
 extern "C" int wait_until_press_key_cv()
 {
-    return wait_key_cv(150);
+    return wait_key_cv(0);
 }
 // ----------------------------------------
 
@@ -451,6 +451,20 @@ extern "C" void show_image_cv(image p, const char *name)
         cerr << "OpenCV exception: show_image_cv \n";
     }
 }
+
+// deal with camera number
+extern "C" int deal_camera(char c_num1, char c_num2)
+{
+    if (c_num1 == '1' && c_num2 == '0')
+    {
+        return 9;
+    }
+    else
+    {
+        return (c_num1 - '0') - 1;
+    }
+}
+
 // ----------------------------------------
 
 /*
