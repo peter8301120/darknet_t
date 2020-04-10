@@ -10,6 +10,7 @@
 #include <stdio.h>
 #include <time.h>
 #include <dirent.h> 
+#include <unistd.h>
 
 #ifndef __COMPAR_FN_T
 #define __COMPAR_FN_T
@@ -1684,10 +1685,10 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
                 int camera_number = deal_camera(de->d_name[file_camera_num], de->d_name[file_camera_num + 1]);
                 //printf("%s, %d\n", de->d_name, camera_number);
                 // if is licence( == 0) remove 
-                //if (de->d_name[file_license_num] == '0'){
-                //    remove(input);
-                //    continue;
-                //}
+                if (de->d_name[file_license_num] == '0'){
+                    remove(input);
+                    continue;
+                }
 
 		//image im;
 		//image sized = load_image_resize(input, net.w, net.h, net.c, &im);
@@ -1780,7 +1781,8 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		fclose(json_file);
 	    }
             // remove
-            //remove(input);
+            remove(input);
+            sleep(0.01); 
         }
         closedir(dr);
 
@@ -1810,10 +1812,10 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
                 int camera_number = deal_camera(de2->d_name[file_camera_num], de2->d_name[file_camera_num + 1]) + 10;
                 //printf("%s, %d\n", de->d_name, camera_number);
                 // if is licence( == 0) remove 
-                //if (de->d_name[file_license_num] == '0'){
-                //    remove(input);
-                //    continue;
-                //}
+                if (de2->d_name[file_license_num] == '0'){
+                    remove(input);
+                    continue;
+                }
 
 		//image im;
 		//image sized = load_image_resize(input, net.w, net.h, net.c, &im);
@@ -1905,7 +1907,8 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		fclose(json_file);
 	    }
             // remove
-            //remove(input);
+            remove(input);
+            sleep(0.01); 
         }
         closedir(dr2);
     }
