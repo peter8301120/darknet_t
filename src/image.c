@@ -754,7 +754,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     free_image(label);
 
     // save picture
-    if (dis_final >= 0){
+    if (dis_final > 0){
         char image_path[256];
         strncpy(image_path, "./ftp-upload01/", sizeof(image_path));
         if (camera_num > 9 )
