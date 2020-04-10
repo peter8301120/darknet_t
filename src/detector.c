@@ -1496,6 +1496,13 @@ void calc_anchors(char *datacfg, int num_of_clusters, int width, int height, int
 void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filename, float thresh,
     float hier_thresh, int dont_show, int ext_output, int save_labels, char *outfile, int letter_box, int benchmark_layers)
 {
+    // if all == 0 => show all else show the camera all
+    int all = 0;
+
+    printf("請輸入欲觀看的攝影機編號(預設0是16台全看):");
+    scanf("%d", &all);
+
+
     int file_license_num = 18;
     int file_camera_num = 20;
     char* image1_path = "./ftp-download01";
@@ -1711,9 +1718,10 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		}
 		draw_detections2_v3(im, dets, nboxes, thresh, names, alphabet, l.classes, ext_output, points_x, points_y, number, de->d_name, line_x, line_y, a, b, interval, timestr, total_num, camera_number);
                 
-		save_image(im, "predictions");
 		if (!dont_show) {
-		    show_image(im, "predictions");
+                    //printf("c_num: %d , all: %d\n", camera_number, all);
+		    show_image2(im, camera_number, all);
+		    //show_image(im, "aa");
 		}
 
 		if (json_file) {
@@ -1836,9 +1844,9 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
 		}
 		draw_detections2_v3(im, dets, nboxes, thresh, names, alphabet, l.classes, ext_output, points_x, points_y, number, de2->d_name, line_x, line_y, a, b, interval, timestr, total_num, camera_number);
                 
-		save_image(im, "predictions");
 		if (!dont_show) {
-		    show_image(im, "predictions");
+		    //printf("c_num: %d , all: %d\n", camera_number, all);
+		    show_image2(im, camera_number, all);
 		}
 
 		if (json_file) {

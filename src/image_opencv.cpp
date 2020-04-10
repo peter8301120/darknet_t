@@ -398,7 +398,7 @@ extern "C" int wait_key_cv(int delay)
 
 extern "C" int wait_until_press_key_cv()
 {
-    return wait_key_cv(0);
+    return wait_key_cv(200);
 }
 // ----------------------------------------
 
@@ -452,6 +452,363 @@ extern "C" void show_image_cv(image p, const char *name)
     }
 }
 
+extern "C" void show_image_cv2(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(1280, 685) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 1280, 685);
+        cv::moveWindow(name, 300, 200);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all1(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 15, 0);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all2(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 515, 0);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all3(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 1000, 0);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all4(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 1500, 0);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all5(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 15, 300);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all6(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 515, 300);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all7(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 1000, 300);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all8(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 1500, 300);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all9(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 15, 550);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all10(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 515, 550);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all11(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 1000, 550);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all12(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 1500, 550);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all13(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 15, 800);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all14(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 515, 800);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all15(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 1000, 800);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
+extern "C" void show_image_cv_all16(image p, const char *name)
+{
+    try {
+        image copy = copy_image(p);
+        constrain_image(copy);
+
+        cv::Mat mat = image_to_mat(copy);
+        if (mat.channels() == 3) cv::cvtColor(mat, mat, cv::COLOR_RGB2BGR);
+        else if (mat.channels() == 4) cv::cvtColor(mat, mat, cv::COLOR_RGBA2BGR);
+        cv::resize( mat, mat, cv::Size(400, 200) );
+        cv::namedWindow(name, cv::WINDOW_AUTOSIZE);
+        cv::resizeWindow(name, 400, 200);
+        cv::moveWindow(name, 1500, 800);
+        cv::imshow(name, mat);
+        free_image(copy);
+    }
+    catch (...) {
+        cerr << "OpenCV exception: show_image_cv \n";
+    }
+}
+
 // deal with camera number
 extern "C" int deal_camera(char c_num1, char c_num2)
 {
@@ -464,6 +821,7 @@ extern "C" int deal_camera(char c_num1, char c_num2)
         return (c_num1 - '0') - 1;
     }
 }
+
 
 // ----------------------------------------
 

@@ -251,7 +251,7 @@ numberfile = ""
 l_coordinate = 0
 
 root = Tk()
-root.title("car counting")
+root.title("configure")
 root.geometry('1500x800+200+100')
 frame_w = 1280
 frame_h = 675

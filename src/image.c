@@ -1000,6 +1000,142 @@ void show_image(image p, const char *name)
 #endif  // OPENCV
 }
 
+void show_image2(image p, int c_num, int c_all)
+{
+    //show all
+    if (c_all == 0)
+    {
+        if (c_num == 0)
+        {
+            show_image_cv_all1(p, "camera 1");
+        }
+        else if  (c_num == 1)
+        {
+            show_image_cv_all2(p, "camera 2");
+        }
+        else if  (c_num == 2)
+        {
+            show_image_cv_all3(p, "camera 3");
+        }
+        else if  (c_num == 3)
+        {
+            show_image_cv_all4(p, "camera 4");
+        }
+        else if  (c_num == 4)
+        {
+            show_image_cv_all5(p, "camera 5");
+        }
+        else if  (c_num == 5)
+        {
+            show_image_cv_all6(p, "camera 6");
+        }
+        else if  (c_num == 6)
+        {
+            show_image_cv_all7(p, "camera 7");
+        }
+        else if  (c_num == 7)
+        {
+            show_image_cv_all8(p, "camera 8");
+        }
+        else if  (c_num == 8)
+        {
+            show_image_cv_all9(p, "camera 9");
+        }
+        else if  (c_num == 9)
+        {
+            show_image_cv_all10(p, "camera 10");
+        }
+        else if  (c_num == 10)
+        {
+            show_image_cv_all11(p, "camera 11");
+        }
+        else if  (c_num == 11)
+        {
+            show_image_cv_all12(p, "camera 12");
+        }
+        else if  (c_num == 12)
+        {
+            show_image_cv_all13(p, "camera 13");
+        }
+        else if  (c_num == 13)
+        {
+            show_image_cv_all14(p, "camera 14");
+        }
+        else if  (c_num == 14)
+        {
+            show_image_cv_all15(p, "camera 15");
+        }
+        else if  (c_num == 15)
+        {
+            show_image_cv_all16(p, "camera 16");
+        }
+    }
+    else if (c_all == 1 && c_num == 0)
+    {
+        show_image_cv2(p, "camera 1");
+    }
+    else if (c_all == 2 && c_num == 1)
+    {
+        show_image_cv2(p, "camera 2");
+    }
+    else if (c_all == 3 && c_num == 2)
+    {
+        show_image_cv2(p, "camera 3");
+    }
+    else if (c_all == 4 && c_num == 3)
+    {
+        show_image_cv2(p, "camera 4");
+    }
+    else if (c_all == 5 && c_num == 4)
+    {
+        show_image_cv2(p, "camera 5");
+    }
+    else if (c_all == 6 && c_num == 5)
+    {
+        show_image_cv2(p, "camera 6");
+    }
+    else if (c_all == 7 && c_num == 6)
+    {
+        show_image_cv2(p, "camera 7");
+    }
+    else if (c_all == 8 && c_num == 7)
+    {
+        show_image_cv2(p, "camera 8");
+    }
+    else if (c_all == 9 && c_num == 8)
+    {
+        show_image_cv2(p, "camera 9");
+    }
+    else if (c_all == 10 && c_num == 9)
+    {
+        show_image_cv2(p, "camera 10");
+    }
+    else if (c_all == 11 && c_num == 10)
+    {
+        show_image_cv2(p, "camera 11");
+    }
+    else if (c_all == 12 && c_num == 11)
+    {
+        show_image_cv2(p, "camera 12");
+    }
+    else if (c_all == 13 && c_num == 12)
+    {
+        show_image_cv2(p, "camera 13");
+    }
+    else if (c_all == 14 && c_num == 13)
+    {
+        show_image_cv2(p, "camera 14");
+    }
+    else if (c_all == 15 && c_num == 14)
+    {
+        show_image_cv2(p, "camera 15");
+    }
+    else if (c_all == 16 && c_num == 15)
+    {
+        show_image_cv2(p, "camera 16");
+    }
+}
+
 void save_image_png(image im, const char *name)
 {
     char buff[256];
