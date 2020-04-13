@@ -4,22 +4,22 @@ PASSWORD=abvc123456
 lftp myuser:abvc123456@192.168.2.102 <<EOF  
 	lcd ./ftp-download01
 	cd /Image/Download01
-	cd `date +"%Y%m%d%H"`
+	cd `date -d '1 hours ago' +"%Y%m%d%H"`
 	mget *.jpg
 	mget *.JPG
-	cd ..
-	cd ..
-	cd ./Download02
-	cd `date +"%Y%m%d%H"`
+	bye
+EOF
+
+lftp myuser:abvc123456@192.168.2.102 <<EOF  
 	lcd ./ftp-download02
+	cd /Image/Download02
+	cd `date -d '1 hours ago' +"%Y%m%d%H"`
 	mget *.jpg
 	mget *.JPG
 	bye
 EOF
 
 
-
-
-		  
+		 
 
 

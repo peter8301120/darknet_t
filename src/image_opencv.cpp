@@ -398,7 +398,7 @@ extern "C" int wait_key_cv(int delay)
 
 extern "C" int wait_until_press_key_cv()
 {
-    return wait_key_cv(200);
+    return wait_key_cv(400);
 }
 // ----------------------------------------
 

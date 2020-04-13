@@ -1653,13 +1653,17 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
     }
     int j;
     float nms = .45;    // 0.4F
-    // time
-    char timestr[256];
-    time_t secs = time(0);
-    struct tm *local = localtime(&secs);
-    sprintf(timestr, "%04d%02d%02d%02d", (local->tm_year + 1900), (local->tm_mon + 1), local->tm_mday, local->tm_hour);
 
     while (1) {
+        printf("wait for 60 second\n");
+        sleep(60);
+
+        // time
+        char timestr[256];
+        time_t secs = time(0);
+        struct tm *local = localtime(&secs);
+        sprintf(timestr, "%04d%02d%02d%02d", (local->tm_year + 1900), (local->tm_mon + 1), local->tm_mday, local->tm_hour);
+
         struct dirent *de;  // Pointer for directory entry 
         // opendir() returns a pointer of DIR type.  
         DIR *dr = opendir(image1_path); 
@@ -1673,7 +1677,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         // Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html 
         // for readdir() 
         while ((de = readdir(dr)) != NULL){
-            sleep(0.01);
+            sleep(0.5);
             char *s;
             s = strstr(de->d_name, ".JPG");
             //printf("%s\n", de->d_name);
@@ -1799,7 +1803,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         // Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html 
         // for readdir() 
         while ((de2 = readdir(dr2)) != NULL){
-            sleep(0.01);
+            sleep(0.5);
             char *s;
             s = strstr(de2->d_name, ".JPG");
             //printf("%s\n", de2->d_name);
@@ -1911,7 +1915,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         }
         closedir(dr2);
     }
-
+    destroy_all_windows_cv();
 
     // free memory
     free_ptrs((void**)names, net.layers[net.n - 1].classes);

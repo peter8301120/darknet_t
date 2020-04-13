@@ -6,6 +6,7 @@
 #include "blas.h"
 #include "dark_cuda.h"
 #include <stdio.h>
+#include <string.h>
 #include <time.h>
 #ifndef _USE_MATH_DEFINES
 #define _USE_MATH_DEFINES
@@ -761,7 +762,13 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
         {
             strncpy(image_path, "./ftp-upload02/", sizeof(image_path));
         }
-        strncat(image_path, File, sizeof(image_path));
+        
+        // file name without .jpg
+        int File_len = strlen(File);
+        char* file_not_jpg[25]; 
+        strncpy(file_not_jpg, File, (File_len - 4));
+        
+        strncat(image_path, file_not_jpg, sizeof(image_path));
         strncat(image_path, "_", sizeof(image_path));
         strncat(image_path, s, sizeof(image_path));
         strncat(image_path, ".jpg", sizeof(image_path));
