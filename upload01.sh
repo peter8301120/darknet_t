@@ -16,7 +16,6 @@ lftp 01:04580682@192.168.2.102 << EOF
 EOF
 
 echo "upload01 finish!"
-sleep 3
 echo "Remove txt and .jpg!"
 cd ./ftp-upload01
 rm *.txt
