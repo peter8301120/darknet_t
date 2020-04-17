@@ -695,7 +695,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     int max2_index = -1;
     if (object_between_lines > 1){
         for(int j = 0; j < object_between_lines; j++){
-            if (object_bot[j] > max && j > 0){
+            if (object_bot[j] > max && j > 0 && object_bot[j] - max > 100){
                 max2 = max;
                 max2_index = max_index;
                 max = object_bot[j];
@@ -708,11 +708,11 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
                 max_index = j;
             }
             else if(j == 1){
-                if (object_bot[j] > max){
+                if (object_bot[j] > max && object_bot[j] - max > 100){
                     max = object_bot[j];
                     max_index = j;
                 }
-                else{
+                else if (max - object_bot[j] > 100){
                     max2 = object_bot[j];
                     max2_index = j;
                 }
