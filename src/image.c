@@ -697,7 +697,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     int max2 = -999;
     int max_index = -1;
     int max2_index = -1;
-    if (object_between_lines > 1){
+    if (object_between_lines >= 1){
         for(int j = 0; j < object_between_lines; j++){
             if (object_bot[j] > max && j > 0 && object_bot[j] - max > 100){
                 max2 = max;

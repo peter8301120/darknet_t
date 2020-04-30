@@ -32,7 +32,7 @@ for img in image_files:
         label=vq([RGB_color], cluster_color)[0]
         # save log file and remove picture
         f = open(ftp_upload1, "a")
-        f.write(img[:-4] + "_" + label + "\n")
+        f.write(img[:-4] + "_" + str(label[0]) + "\n")
         f.close()
         os.remove(img_path)
 
@@ -49,7 +49,7 @@ for img in image_files2:
         label=vq([RGB_color], cluster_color)[0]
         # save log file and remove picture
         f = open(ftp_upload2, "a")
-        f.write(img[:-4] + "_" + label + "\n")
+        f.write(img[:-4] + "_" + str(label[0]) + "\n")
         f.close()
         os.remove(img_path)
 

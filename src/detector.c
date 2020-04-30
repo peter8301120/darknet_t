@@ -1691,7 +1691,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
                 //printf("%s, %d\n", de->d_name, camera_number);
                 // if is licence( == 0) remove 
                 if (de->d_name[file_license_num] == '0'){
-                    remove(input);
+                    //remove(input);
                     continue;
                 }
 
@@ -1817,7 +1817,7 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
                 //printf("%s, %d\n", de->d_name, camera_number);
                 // if is licence( == 0) remove 
                 if (de2->d_name[file_license_num] == '0'){
-                    remove(input);
+                    //remove(input);
                     continue;
                 }
 
@@ -1914,6 +1914,9 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
             remove(input);
         }
         closedir(dr2);
+
+        // test call python script
+        system("python3 Kmeans_real.py");
     }
     destroy_all_windows_cv();
 
