@@ -5,6 +5,7 @@
 #include "utils.h"
 #include "blas.h"
 #include "dark_cuda.h"
+#include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 #include <time.h>
@@ -572,6 +573,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
 
     int object_between_lines = 0;
     int object_bot[selected_detections_num];
+    int object_type[selected_detections_num];
     float distance[selected_detections_num];
 
 
@@ -631,7 +633,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
             //static int img_id = 0;
             //img_id++;
             //char image_name[1024];
-            //int best_class_id = selected_detections[i].best_class;
+            int best_class_id = selected_detections[i].best_class;
             //sprintf(image_name, "result_img/img_%d_%d_%d_%s.jpg", frame_id, img_id, best_class_id, names[best_class_id]);
             //save_image(cropped_im, image_name);
             //free_image(cropped_im);
@@ -648,6 +650,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
                     int current = ys[j + 1] - middle_y;
                     float percent = (float)current / (float)total;
                     object_bot[object_between_lines] = middle_y;
+                    object_type[object_between_lines] = best_class_id;
                     distance[object_between_lines] = (total_num[camera_num + 1] - j - 2) * port_interval[camera_num] + percent * port_interval[camera_num];
                     object_between_lines = object_between_lines + 1;
                     //printf("number: %d, total_number: %d\n", j, total_num[camera_num + 1]);
@@ -689,6 +692,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     }
 
     // compute distance between two objects with lowest bot
+    int final_type = -1;
     int max = -999;
     int max2 = -999;
     int max_index = -1;
@@ -700,17 +704,20 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
                 max2_index = max_index;
                 max = object_bot[j];
                 max_index = j;
+                final_type = object_type[j];
             }
             else if(j == 0){
                 max2 = object_bot[j];
                 max2_index = j;
                 max = object_bot[j];
                 max_index = j;
+                final_type = object_type[j];
             }
             else if(j == 1){
                 if (object_bot[j] > max && object_bot[j] - max > 100){
                     max = object_bot[j];
                     max_index = j;
+                    final_type = object_type[j];
                 }
                 else if (max - object_bot[j] > 100){
                     max2 = object_bot[j];
@@ -735,7 +742,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     char s[11]; 
     sprintf(s,"%ld", dis_final);
 
-    // write log file
+    // write log file for distance
     if (dis_final > 0){
         int len = strlen(File) + strlen(s) + 2;
         char buffer[len];
@@ -749,6 +756,32 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
         fwrite(buffer,1,sizeof(buffer),fp);
         fclose(fp);
     }
+
+    char s2[11]; 
+    sprintf(s2,"%ld", final_type);
+
+    // write log file for vehicle type
+    char file_type[256];
+    strncpy(file_type, "./ftp-upload01/", sizeof(file_type));
+    if (camera_num > 9 )
+    {
+        strncpy(file_type, "./ftp-upload02/", sizeof(file_type));
+    }
+    strncat(file_type, timeString, sizeof(file_type));
+    strncat(file_type, "_type.txt", sizeof(file_type));
+
+    int File_len = strlen(File) - 4;
+    int len = File_len + strlen(s2) + 2;
+    char buffer[len];
+    memset(buffer, '\0', len);
+    FILE *fp; 
+    strncat(buffer, File, File_len);
+    strncat(buffer, "_", sizeof(buffer));
+    strncat(buffer, s2, sizeof(buffer));
+    strncat(buffer, "\n", sizeof(buffer));
+    fp = fopen(file_type,"a");
+    fwrite(buffer,1,sizeof(buffer),fp);
+    fclose(fp);
 
     image label = get_label2_v3(alphabet, s, (im.h*.03));
     draw_label(im, 2100, 3500, label, rgb);
@@ -764,9 +797,9 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
         }
         
         // file name without .jpg
-        int File_len = strlen(File);
-        char* file_not_jpg[25]; 
-        strncpy(file_not_jpg, File, (File_len - 4));
+        int File_len = strlen(File) - 4;
+        char* file_not_jpg[256]; 
+        strncpy(file_not_jpg, File, File_len);
         
         strncat(image_path, file_not_jpg, sizeof(image_path));
         strncat(image_path, "_", sizeof(image_path));
@@ -785,7 +818,7 @@ void draw_detections(image im, int num, float thresh, box *boxes, float **probs,
     for(i = 0; i < num; ++i){
         int class_id = max_index(probs[i], classes);
         float prob = probs[i][class_id];
-        if(prob > thresh){
+        if(prob > thresh){	
 
             //// for comparison with OpenCV version of DNN Darknet Yolo v2
             //printf("\n %f, %f, %f, %f, ", boxes[i].x, boxes[i].y, boxes[i].w, boxes[i].h);
