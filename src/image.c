@@ -757,32 +757,33 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
         fclose(fp);
     }
 
-    char s2[11]; 
-    sprintf(s2,"%ld", final_type);
-
     // write log file for vehicle type
-    char file_type[256];
-    strncpy(file_type, "./ftp-upload01/", sizeof(file_type));
-    if (camera_num > 9 )
-    {
-        strncpy(file_type, "./ftp-upload02/", sizeof(file_type));
+    if (final_type > -1){
+        char s2[11]; 
+        sprintf(s2,"%ld", final_type);
+
+        char file_type[256];
+        strncpy(file_type, "./ftp-upload01/", sizeof(file_type));
+        if (camera_num > 9 )
+        {
+            strncpy(file_type, "./ftp-upload02/", sizeof(file_type));
+        }
+        strncat(file_type, timeString, sizeof(file_type));
+        strncat(file_type, "_type.txt", sizeof(file_type));
+
+        int File_len = strlen(File) - 4;
+        int len = File_len + strlen(s2) + 2;
+        char buffer[len];
+        memset(buffer, '\0', len);
+        FILE *fp; 
+        strncat(buffer, File, File_len);
+        strncat(buffer, "_", sizeof(buffer));
+        strncat(buffer, s2, sizeof(buffer));
+        strncat(buffer, "\n", sizeof(buffer));
+        fp = fopen(file_type,"a");
+        fwrite(buffer,1,sizeof(buffer),fp);
+        fclose(fp);
     }
-    strncat(file_type, timeString, sizeof(file_type));
-    strncat(file_type, "_type.txt", sizeof(file_type));
-
-    int File_len = strlen(File) - 4;
-    int len = File_len + strlen(s2) + 2;
-    char buffer[len];
-    memset(buffer, '\0', len);
-    FILE *fp; 
-    strncat(buffer, File, File_len);
-    strncat(buffer, "_", sizeof(buffer));
-    strncat(buffer, s2, sizeof(buffer));
-    strncat(buffer, "\n", sizeof(buffer));
-    fp = fopen(file_type,"a");
-    fwrite(buffer,1,sizeof(buffer),fp);
-    fclose(fp);
-
     image label = get_label2_v3(alphabet, s, (im.h*.03));
     draw_label(im, 2100, 3500, label, rgb);
     free_image(label);
