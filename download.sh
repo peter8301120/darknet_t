@@ -7,6 +7,8 @@ lftp myuser:abvc123456@192.168.2.102 <<EOF
 	cd `date -d '1 hours ago' +"%Y%m%d%H"`
 	mget *.jpg
 	mget *.JPG
+        cd ..
+        mv `date -d '1 hours ago' +"%Y%m%d%H"` `date -d '1 hours ago' +"%Y%m%d%H"_gpu`
 	bye
 EOF
 
@@ -16,6 +18,8 @@ lftp myuser:abvc123456@192.168.2.102 <<EOF
 	cd `date -d '1 hours ago' +"%Y%m%d%H"`
 	mget *.jpg
 	mget *.JPG
+        cd ..
+        mv `date -d '1 hours ago' +"%Y%m%d%H"` `date -d '1 hours ago' +"%Y%m%d%H"_gpu`
 	bye
 EOF
 
