@@ -14,6 +14,10 @@
 #endif
 #include <math.h>
 
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
+
 #ifndef STB_IMAGE_IMPLEMENTATION
 #define STB_IMAGE_IMPLEMENTATION
 #include "stb_image.h"
@@ -493,15 +497,37 @@ void draw_detections_v3(image im, detection *dets, int num, float thresh, char *
 
 void draw_detections2_v3(image im, detection *dets, int num, float thresh, char **names, image **alphabet, int classes, int ext_output, int* xs, int* ys, int number, char* File, int* line_x, int* line_y, float* line_a, float* line_b, int* port_interval, char* timeString, int* total_num, int camera_num)
 {
-    // log name
-    char input[256];
-    strncpy(input, "./ftp-upload01/", sizeof(input));
+    // save position
+    char image_date[20];
+    strncpy(image_date, File, 10);
+
+    char finish_folder[256];
+    strncpy(finish_folder, "./ftp-upload01_temp/", sizeof(finish_folder));
     if (camera_num > 9 )
     {
-        strncpy(input, "./ftp-upload02/", sizeof(input));
+        strncpy(finish_folder, "./ftp-upload02_temp/", sizeof(finish_folder));
     }
-    strncat(input, timeString, sizeof(input));
+    strncat(finish_folder, image_date, sizeof(finish_folder));
+    strncat(finish_folder, "/", sizeof(finish_folder));
+
+    // log name
+    char input[256];
+    strncpy(input, finish_folder, sizeof(input));
+    strncat(input, image_date, sizeof(input));
     strncat(input, ".txt", sizeof(input));
+    // make dir if it is not exists
+    struct stat st = {0};
+    if (stat("ftp-upload01_temp", &st) == -1) {
+        mkdir("ftp-upload01_temp", 0700);
+    }
+    struct stat st1 = {0};
+    if (stat("ftp-upload02_temp", &st1) == -1) {
+        mkdir("ftp-upload02_temp", 0700);
+    }
+    struct stat st2 = {0};
+    if (stat(finish_folder, &st2) == -1) {
+        mkdir(finish_folder, 0700);
+    }
 
     static int frame_id = 0;
     frame_id++;
@@ -749,7 +775,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
         char buffer[len];
         memset(buffer, '\0', len);
         FILE *fp; 
-        strncat(buffer, File, sizeof(buffer));
+        strncpy(buffer, File, sizeof(buffer));
         strncat(buffer, " ", sizeof(buffer));
         strncat(buffer, s, sizeof(buffer));
         strncat(buffer, "\n", sizeof(buffer));
@@ -764,12 +790,8 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
         sprintf(s2,"%ld", final_type);
 
         char file_type[256];
-        strncpy(file_type, "./ftp-upload01/", sizeof(file_type));
-        if (camera_num > 9 )
-        {
-            strncpy(file_type, "./ftp-upload02/", sizeof(file_type));
-        }
-        strncat(file_type, timeString, sizeof(file_type));
+        strncpy(file_type, finish_folder, sizeof(file_type));
+        strncat(file_type, image_date, sizeof(file_type));
         strncat(file_type, "_type.txt", sizeof(file_type));
 
         int File_len = strlen(File) - 4;
@@ -777,7 +799,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
         char buffer[len];
         memset(buffer, '\0', len);
         FILE *fp; 
-        strncat(buffer, File, File_len);
+        strncpy(buffer, File, File_len);
         strncat(buffer, "_", sizeof(buffer));
         strncat(buffer, s2, sizeof(buffer));
         strncat(buffer, "\n", sizeof(buffer));
@@ -792,17 +814,11 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     // save picture
     if (dis_final > 0){
         char image_path[256];
-        strncpy(image_path, "./ftp-upload01/", sizeof(image_path));
-        if (camera_num > 9 )
-        {
-            strncpy(image_path, "./ftp-upload02/", sizeof(image_path));
-        }
-        
         // file name without .jpg
         int File_len = strlen(File) - 4;
         char* file_not_jpg[256]; 
         strncpy(file_not_jpg, File, File_len);
-        
+        strncpy(image_path, finish_folder, sizeof(image_path));
         strncat(image_path, file_not_jpg, sizeof(image_path));
         strncat(image_path, "_", sizeof(image_path));
         strncat(image_path, s, sizeof(image_path));

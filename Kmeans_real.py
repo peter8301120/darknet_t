@@ -7,16 +7,14 @@ import scipy.cluster.hierarchy as sch
 from scipy.cluster.vq import vq,kmeans,whiten
 import datetime
 import time
-
-timestring = time.strftime('%Y%m%d%H', time.localtime())
-# log file
-ftp_upload1 = os.path.join(os.getcwd(), "ftp-upload01", timestring + "_color.txt")
-ftp_upload2 = os.path.join(os.getcwd(), "ftp-upload02", timestring + "_color.txt")
-
 # center
 color = ["red", "yellow", "blue", "black", "white", "gray"]
 cluster_color = [[255, 0, 0], [255, 255, 0], [0, 0, 255], [0, 0, 0], [255, 255, 255], [127, 127, 127]]
 cluster_color = [[110, 22, 26], [176, 156, 33], [0, 0, 255], [25, 25, 25], [200, 200, 200], [100, 125, 135]]
+if not os.path.exists("ftp-upload01_temp"):
+    os.mkdir("ftp-upload01_temp")
+if not os.path.exists("ftp-upload02_temp"):
+    os.mkdir("ftp-upload02_temp")
 
 image_files = os.listdir("./ftp-download01")
 
@@ -30,6 +28,9 @@ for img in image_files:
         RGB_color = [mean_color[2], mean_color[1], mean_color[0]]
         label=vq([RGB_color], cluster_color)[0]
         # save log file and remove picture
+        ftp_upload1 = os.path.join(os.getcwd(), "ftp-upload01_temp", img[:10], img[:10] + "_color.txt")
+        if not os.path.exists( os.path.join(os.getcwd(), "ftp-upload01_temp", img[:10])):
+            os.mkdir( os.path.join(os.getcwd(), "ftp-upload01_temp", img[:10]))
         f = open(ftp_upload1, "a")
         f.write(img[:-4] + "_" + str(label[0]) + "\n")
         f.close()
@@ -47,6 +48,9 @@ for img in image_files2:
         RGB_color = [mean_color[2], mean_color[1], mean_color[0]]
         label=vq([RGB_color], cluster_color)[0]
         # save log file and remove picture
+        ftp_upload2 = os.path.join(os.getcwd(), "ftp-upload02_temp", img[:10], img[:10] + "_color.txt")
+        if not os.path.exists( os.path.join(os.getcwd(), "ftp-upload02_temp", img[:10])):
+            os.mkdir( os.path.join(os.getcwd(), "ftp-upload02_temp", img[:10]))
         f = open(ftp_upload2, "a")
         f.write(img[:-4] + "_" + str(label[0]) + "\n")
         f.close()
