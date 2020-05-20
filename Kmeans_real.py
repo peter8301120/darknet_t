@@ -56,3 +56,8 @@ for img in image_files2:
         f.close()
         os.remove(img_path)
 
+# rename
+if if not os.path.exists( os.path.join(os.getcwd(), "ftp-upload01")):
+            os.rename( os.path.join(os.getcwd(), "ftp-upload01_temp"), os.path.join(os.getcwd(), "ftp-upload01"))
+if if not os.path.exists( os.path.join(os.getcwd(), "ftp-upload02")):
+            os.rename( os.path.join(os.getcwd(), "ftp-upload02_temp"), os.path.join(os.getcwd(), "ftp-upload02"))

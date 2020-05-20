@@ -1,24 +1,14 @@
-HOST=192.168.2.102
-USERNAME=02
-PASSWORD=04580682
-filename=echo date +"%Y%m%d%H".txt
+HOST=223.200.97.241
+USERNAME=upload02
+PASSWORD=upload02
 echo $filename
-lftp 02:04580682@192.168.2.102 << EOF
+lftp upload02:upload02@223.200.97.241 << EOF
   lcd ./ftp-upload02
-  mkdir ./Ftp-upload02
-  cd ./Ftp-upload02
-  mkdir `date +"%Y%m%d"`
-  cd `date +"%Y%m%d"`
-  mput *.txt
-  mput *.jpg
-  mput *.JPG
+  mirror -R
   bye 
 EOF
 
 echo "upload02 finish!"
 echo "Remove txt and .jpg!"
-cd ./ftp-upload02
-rm *.txt
-rm *.jpg
-rm *.JPG
+rm -r ./ftp-upload02
 echo "finish Remove txt and .jpg!"
