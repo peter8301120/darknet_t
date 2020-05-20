@@ -8,7 +8,7 @@ do
 	if [ "$time_m" = 21 ]
 	then
 		python3 ftp_download01.py
-		python3 ftp_download01.py
+		python3 ftp_download02.py
 		sleep 60
 	else 
 		if [ "$time_m" = 55 ]
