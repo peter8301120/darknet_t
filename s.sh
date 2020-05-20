@@ -1,28 +1,14 @@
-time1=$(date +"%H")
-#time2=$(date -d '1 hours' +"%H")
-#if [ ("$time_m" > 05) ]
-#	then
-#	time2=$(date -d '1 hours' +"%H")
-#fi
-#time3=$time1
 time_m=$(date +"%M")
 
 while true
 do 
-	date +"%Y/%m/%d-%H"
-	time1=$(date +"%H")
 	time_m=$(date +"%M")
-	echo $time1
-	#echo $time2
-	#echo $time3
 
 	#5分下載前一小時資料
-	if [ "$time_m" = 05 ]
+	if [ "$time_m" = 21 ]
 	then
-		echo download files at `date -d '1 hours ago' +"%Y%m%d%H"`
-		sh download.sh
-		#time2=$(date -d '1 hours' +"%H")
-		#echo $time2
+		python3 ftp_download01.py
+		python3 ftp_download01.py
 		sleep 60
 	else 
 		if [ "$time_m" = 55 ]
