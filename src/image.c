@@ -518,15 +518,15 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     // make dir if it is not exists
     struct stat st = {0};
     if (stat("ftp-upload01_temp", &st) == -1) {
-        mkdir("ftp-upload01_temp", 0700);
+        mkdir("ftp-upload01_temp", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     }
     struct stat st1 = {0};
     if (stat("ftp-upload02_temp", &st1) == -1) {
-        mkdir("ftp-upload02_temp", 0700);
+        mkdir("ftp-upload02_temp", S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     }
     struct stat st2 = {0};
     if (stat(finish_folder, &st2) == -1) {
-        mkdir(finish_folder, 0700);
+        mkdir(finish_folder, S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
     }
 
     static int frame_id = 0;

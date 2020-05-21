@@ -5,7 +5,7 @@ do
 	time_m=$(date +"%M")
 
 	#5分下載前一小時資料
-	if [ "$time_m" = 21 ]
+	if [ "$time_m" = 05 ]
 	then
 		python3 ftp_download01.py
 		python3 ftp_download02.py
@@ -16,6 +16,8 @@ do
 			echo Upload files to `date +"%Y%m%d"`
 			sh upload01.sh
 			sh upload02.sh
+                        python3 ftp_upload01.py
+                        python3 ftp_upload02.py
 			echo "Upload finished ..."
 			#time3=$(date -d '1 hours' +"%H")
 			sleep 60

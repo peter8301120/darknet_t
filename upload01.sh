@@ -4,6 +4,7 @@ PASSWORD=upload01
 echo $filename
 lftp upload01:upload01@223.200.97.241 << EOF
   lcd ./ftp-upload01
+  lcd ./empty
   mirror -R
   bye 
 EOF

@@ -1668,15 +1668,15 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         // opendir() returns a pointer of DIR type.  
         DIR *dr = opendir(image1_path); 
   
-        if (dr == NULL)  // opendir returns NULL if couldn't open directory 
-        { 
-            printf("Could not open current directory" ); 
-            return 0; 
-        } 
+        //if (dr == NULL)  // opendir returns NULL if couldn't open directory 
+        //{ 
+        //    printf("Could not open current directory" ); 
+        //    continue;
+        //} 
   
         // Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html 
         // for readdir() 
-        while ((de = readdir(dr)) != NULL){
+        while (dr != NULL && (de = readdir(dr)) != NULL){
             sleep(0.5);
             char *s;
             s = strstr(de->d_name, ".JPG");
@@ -1794,15 +1794,15 @@ void test_detector(char *datacfg, char *cfgfile, char *weightfile, char *filenam
         // opendir() returns a pointer of DIR type.  
         DIR *dr2 = opendir(image2_path); 
   
-        if (dr2 == NULL)  // opendir returns NULL if couldn't open directory 
-        { 
-            printf("Could not open current directory" ); 
-            return 0; 
-        } 
+        //if (dr2 == NULL)  // opendir returns NULL if couldn't open directory 
+        //{ 
+        //    printf("Could not open current directory" ); 
+        //    continue;
+        //} 
   
         // Refer http://pubs.opengroup.org/onlinepubs/7990989775/xsh/readdir.html 
         // for readdir() 
-        while ((de2 = readdir(dr2)) != NULL){
+        while ( dr2 != NULL && (de2 = readdir(dr2)) != NULL){
             sleep(0.5);
             char *s;
             s = strstr(de2->d_name, ".JPG");
