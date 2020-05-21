@@ -598,10 +598,16 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
     }
 
     int object_between_lines = 0;
+    int object_middley[selected_detections_num];
     int object_bot[selected_detections_num];
+    int object_left[selected_detections_num];
+    int object_right[selected_detections_num];
+    int object_top[selected_detections_num];
     int object_type[selected_detections_num];
     float distance[selected_detections_num];
-
+    float red_a[selected_detections_num];
+    float green_a[selected_detections_num];
+    float blue_a[selected_detections_num];
 
     // image output
     qsort(selected_detections, selected_detections_num, sizeof(*selected_detections), compare_by_probs);
@@ -665,8 +671,6 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
             //free_image(cropped_im);
             //printf("%d\n", number);
 
-            
-
             for (int j = total_num[camera_num]; j < total_num[camera_num + 1]; j++)
             {
                 // compute distance between if object is in two lines
@@ -675,7 +679,14 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
                     int total = ys[j + 1] - ys[j];
                     int current = ys[j + 1] - middle_y;
                     float percent = (float)current / (float)total;
-                    object_bot[object_between_lines] = middle_y;
+                    object_middley[object_between_lines] = middle_y;
+                    object_left[object_between_lines] = left;
+                    object_right[object_between_lines] = right;
+                    object_top[object_between_lines] = top;
+                    object_bot[object_between_lines] = bot;
+                    red_a[object_between_lines] = red;
+                    green_a[object_between_lines] = green;
+                    blue_a[object_between_lines] = blue;
                     object_type[object_between_lines] = best_class_id;
                     distance[object_between_lines] = (total_num[camera_num + 1] - j - 2) * port_interval[camera_num] + percent * port_interval[camera_num];
                     object_between_lines = object_between_lines + 1;
@@ -685,12 +696,12 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
                 }
             }
 
-            if (im.c == 1) {
-                draw_box_width_bw(im, left, top, right, bot, width, 0.8);    // 1 channel Black-White
-            }
-            else {
-                draw_box_width(im, left, top, right, bot, width, red, green, blue); // 3 channels RGB
-            }
+            //if (im.c == 1) {
+            //    draw_box_width_bw(im, left, top, right, bot, width, 0.8);    // 1 channel Black-White
+            //}
+            //else {
+            //    draw_box_width(im, left, top, right, bot, width, red, green, blue); // 3 channels RGB
+            //}
 
             if (alphabet) {
                 char labelstr[4096] = { 0 };
@@ -717,40 +728,100 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
             }
     }
 
+    // pick final object in lines
+    int object_final = 0;
+    int object_middley_final[selected_detections_num];
+    int object_type_final[selected_detections_num];
+    float distance_final[selected_detections_num];
+    int object_select = 1;
+    for(int i = 0; i < object_between_lines; i++){
+        object_select = 1;
+        for(int j = 0; j < object_between_lines; j++){
+            if (i == j || object_left[i] >= object_right[j] || object_left[j] >= object_right[i] || object_top[i] >= object_bot[j] || object_top[j] >= object_bot[i])
+                continue;
+            if (object_left[i] < object_left[j] && object_right[i] > object_right[j] && object_top[i] < object_top[j] && object_bot[i] > object_bot[j]){
+                object_select = 0;
+                break;
+            }
+
+            // iou > 0.6 and box i > box j
+            int inter_left = 0;
+            inter_left = object_left[j];
+            if (object_left[i] > object_left[j])
+                inter_left = object_left[i];
+
+            int inter_right = 0;
+            inter_right = object_right[j];
+            if (object_right[i] < object_right[j])
+                inter_right = object_right[i];
+
+            int inter_top = 0;
+            inter_top = object_top[j];
+            if (object_top[i] > object_top[j])
+                inter_top = object_top[i];
+
+            int inter_bot = 0;
+            inter_bot = object_bot[j];
+            if (object_bot[i] < object_bot[j])
+                inter_bot = object_bot[i];
+            int inter_area = (inter_bot - inter_top) * (inter_right - inter_left);
+            int i_area = (object_bot[i] - object_top[i]) * (object_right[i] - object_left[i]);
+            int j_area = (object_bot[j] - object_top[j]) * (object_right[j] - object_left[j]);
+            int union_area = i_area + j_area - inter_area;
+            float iou = (float)inter_area / (float)union_area;
+            if (iou >= 0.6 && i_area > j_area){
+                object_select = 0;
+                break;
+            }
+        }
+        if (object_select == 1)
+        {
+            if (im.c == 1) {
+                draw_box_width_bw(im, object_left[i], object_top[i], object_right[i], object_bot[i], width, 0.8);    // 1 channel Black-White
+            }
+            else {
+                draw_box_width(im, object_left[i], object_top[i], object_right[i], object_bot[i], width, red_a[i], green_a[i], blue_a[i]); // 3 channels RGB
+            }
+            object_middley_final[object_final] = object_middley[i];
+            object_type_final[object_final] = object_type[i];
+            distance_final[object_final] = distance[i];
+            object_final = object_final + 1;
+        }
+    }
+
     // compute distance between two objects with lowest bot
     int final_type = -1;
     int max = -999;
     int max2 = -999;
     int max_index = -1;
     int max2_index = -1;
-    if (object_between_lines >= 1){
-        for(int j = 0; j < object_between_lines; j++){
+    if (object_final >= 1){
+        for(int j = 0; j < object_final; j++){
             if(j == 0){
-                max2 = object_bot[j];
+                max2 = object_middley_final[j];
                 max2_index = j;
-                max = object_bot[j];
+                max = object_middley_final[j];
                 max_index = j;
-                final_type = object_type[j];
+                final_type = object_type_final[j];
             }
             else if(j == 1){
-                if (object_bot[j] > max && object_bot[j] - max > 150){
-                    max = object_bot[j];
+                if (object_middley_final[j] > max && object_middley_final[j] - max > 150){
+                    max = object_middley_final[j];
                     max_index = j;
-                    final_type = object_type[j];
+                    final_type = object_type_final[j];
                 }
-                else if (max - object_bot[j] > 150){
-                    max2 = object_bot[j];
+                else if (max - object_middley_final[j] > 150){
+                    max2 = object_middley_final[j];
                     max2_index = j;
                 }
             }
-            else if (object_bot[j] > max && j > 0 && object_bot[j] - max > 150){
+            else if (object_middley_final[j] > max && j > 0 && object_middley_final[j] - max > 150){
                 max2 = max;
                 max2_index = max_index;
-                max = object_bot[j];
+                max = object_middley_final[j];
                 max_index = j;
-                final_type = object_type[j];
+                final_type = object_type_final[j];
             }
-
         }
     }
     //printf("min: %d, min_index: %d, min2: %d, min2_index: %d\n", max, max_index, max2, max2_index);
@@ -764,7 +835,7 @@ void draw_detections2_v3(image im, detection *dets, int num, float thresh, char 
 
     int dis_final = 0;
     if (max_index != -1){
-        dis_final = (int)(distance[max2_index] - distance[max_index]);
+        dis_final = (int)(distance_final[max2_index] - distance_final[max_index]);
     }
     char s[11]; 
     sprintf(s,"%ld", dis_final);
